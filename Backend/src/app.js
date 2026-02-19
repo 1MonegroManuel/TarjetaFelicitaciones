@@ -26,6 +26,9 @@ app.use('/api/qr', qrRoutes);
 const checkoutRoutes = require('./routes/checkoutRoutes');
 app.use('/api/checkout', checkoutRoutes);
 
+const reportesRoutes = require('./routes/reportesRoutes');
+app.use('/api/reportes', reportesRoutes);
+
 app.get("/", (req, res) => {
   res.json({ message: "API TarjetaFelicitaciones funcionando" });
 });
