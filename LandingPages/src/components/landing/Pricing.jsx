@@ -256,13 +256,6 @@ export default function Pricing() {
                       </li>
                     ))}
                   </ul>
-
-                  <a
-                    href="https://tarjetafelicitaciones-2.onrender.com/"
-                    className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all duration-300 ${styles.button}`}
-                  >
-                    Seleccionar
-                  </a>
                 </div>
               )
             })}
