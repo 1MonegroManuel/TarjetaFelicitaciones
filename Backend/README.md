@@ -15,6 +15,7 @@ API REST en Node.js para gestionar tarjetas de felicitaciones, plantillas, pagos
 
 1. Instala dependencias: `npm install`
 2. Configura las variables de entorno en `.env` (ej. conexión a DB, puerto).
+3. **Migración opcional**: para guardar la plantilla visual (TipoPlantilla, VariantePlantilla), ejecuta el script `scripts/add-tipo-variante-plantilla.sql` en tu base de datos para añadir las columnas a la tabla `Tarjetas`.
 
 ## Ejecución
 
@@ -25,21 +26,23 @@ El servidor corre en el puerto definido en `.env` (por defecto 3000).
 
 ## Rutas de la API
 
+### Endpoints usados por el frontend (PWA)
+
+| Método | Ruta | Uso en frontend |
+|--------|------|------------------|
+| **GET** | `/api/health` | Comprobar si el backend está disponible. Respuesta: `{ ok: true }`. |
+| **GET** | `/api/qr/:codigo` | Abrir carta por QR o por enlace. Respuestas: 200 (carta), 403 + `FechaApertura` (countdown), 410 (expirada), 404/403 (error). |
+| **POST** | `/api/checkout` | Crear carta y obtener código QR. Body: `Titulo`, `Mensaje`, `IdPlantilla`, `FechaApertura` (obligatorios); `TipoPlantilla`, `VariantePlantilla` (ej. basica, azul; premium, stars); `NombreRemitente`, `NombreDestinatario` (opcionales). Respuesta: `{ codigoQR, tarjetaId, precio }`. |
+| **GET** | `/api/plantillas` | Listar plantillas (opcional; el frontend usa `IdPlantilla` 1, 2, 3 por defecto). |
+
+### Resto de rutas
+
 - **GET /**: Mensaje de estado de la API.
-- **Plantillas** (`/api/plantillas`):
-  - `GET /`: Obtiene todas las plantillas.
-  - `POST /`: Crea una nueva plantilla.
-- **Tarjetas** (`/api/tarjetas`):
-  - `POST /`: Crea una nueva tarjeta.
-  - `GET /:id`: Obtiene una tarjeta por ID.
-  - `PUT /:id`: Actualiza una tarjeta por ID.
-  - `DELETE /:id`: Elimina una tarjeta por ID.
-- **Pagos** (`/api/pagos`):
-  - `POST /`: Crea un nuevo pago.
-- **QR** (`/api/qr`):
-  - `GET /:codigo`: Obtiene una tarjeta por código QR (verifica fecha de apertura y registra escaneo).
-- **Checkout** (`/api/checkout`):
-  - `POST /`: Crea una tarjeta, procesa pago simulado y genera código QR.
+- **Plantillas** (`/api/plantillas`): `GET /`, `POST /`.
+- **Tarjetas** (`/api/tarjetas`): CRUD de tarjetas.
+- **Pagos** (`/api/pagos`): `POST /`.
+- **QR** (`/api/qr`): `GET /:codigo` — obtiene tarjeta por código QR, valida fecha de apertura y registra escaneo.
+- **Checkout** (`/api/checkout`): `POST /` — crea tarjeta, pago simulado y código QR.
 
 ## Distribución del Proyecto
 

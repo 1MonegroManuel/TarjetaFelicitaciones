@@ -6,7 +6,14 @@ const app = express();
 
 // Configurar CORS - DEBE IR ANTES de las rutas
 app.use(cors({
-  origin: 'https://tarjetafelicitaciones-1.onrender.com'
+  origin: [
+    'https://tarjetafelicitaciones.onrender.com',
+    'https://tarjetafelicitaciones-1.onrender.com',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    /\.onrender\.com$/
+  ],
+  credentials: true
 }));
 
 app.use(express.json());
@@ -33,8 +40,13 @@ app.get("/", (req, res) => {
   res.json({ message: "API TarjetaFelicitaciones funcionando" });
 });
 
+// Salud del API (para que el frontend compruebe si el backend está disponible)
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ ok: true, message: "API disponible" });
+});
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(process.env.PORT, () => {
-  console.log("Servidor corriendo en puerto", process.env.PORT);
+app.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto", PORT);
 });
