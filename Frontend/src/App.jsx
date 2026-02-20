@@ -1,16 +1,17 @@
-import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import ScanQR from './pages/ScanQR'
-import CartaQR from './pages/CartaQR'
-import EnviarCarta from './pages/EnviarCarta'
+import { Routes, Route } from 'react-router-dom';
+import { LetterProvider } from './context/LetterContext';
+import Home from './components/Home';
+import QRScanner from './components/QRScanner';
+import EnviarCarta from './pages/EnviarCarta';
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/escanear-qr" element={<ScanQR />} />
-      <Route path="/carta/:encoded" element={<CartaQR />} />
-      <Route path="/enviar-carta" element={<EnviarCarta />} />
-    </Routes>
-  )
+    <LetterProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/escanear-qr" element={<QRScanner />} />
+        <Route path="/enviar-carta" element={<EnviarCarta />} />
+      </Routes>
+    </LetterProvider>
+  );
 }

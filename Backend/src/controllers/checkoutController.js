@@ -3,11 +3,33 @@ const { v4: uuidv4 } = require('uuid');
 
 const checkout = async (req, res) => {
     try {
-        const { NombreRemitente, NombreDestinatario, Titulo, Mensaje, FechaApertura, IdPlantilla } = req.body;
+        const {
+            NombreRemitente,
+            NombreDestinatario,
+            Titulo,
+            Mensaje,
+            Contenido,
+            FechaApertura,
+            IdPlantilla,
+            TipoPlantilla,
+            VariantePlantilla
+        } = req.body;
 
-        // Validar campos requeridos
-        if (!NombreRemitente || !NombreDestinatario || !Titulo || !Mensaje || !FechaApertura || !IdPlantilla) {
-            return res.status(400).json({ error: 'Todos los campos son requeridos' });
+        const contenidoCarta = Mensaje || Contenido || '';
+
+        // Validar campos requeridos (Titulo, Contenido/Mensaje, IdPlantilla, FechaApertura)
+        if (!Titulo || !contenidoCarta || !IdPlantilla || !FechaApertura) {
+            return res.status(400).json({ error: 'Título, contenido, fecha de apertura e IdPlantilla son requeridos' });
+        }
+
+        const remitente = NombreRemitente || 'Anónimo';
+        const destinatario = NombreDestinatario || 'Destinatario';
+        const ahora = new Date();
+        const fechaApertura = new Date(FechaApertura);
+
+        // Validación: FechaApertura debe ser hoy o futura
+        if (fechaApertura < new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())) {
+            return res.status(400).json({ error: 'La fecha de apertura no puede ser anterior a hoy' });
         }
 
         const pool = await poolPromise;
@@ -27,22 +49,64 @@ const checkout = async (req, res) => {
 
             const precio = plantillaResult.recordset[0].Precio;
 
-            // Crear Tarjeta con Estado = 'Pendiente'
-            const tarjetaResult = await transaction.request()
-                .input('NombreRemitente', sql.NVarChar, NombreRemitente)
-                .input('NombreDestinatario', sql.NVarChar, NombreDestinatario)
-                .input('Titulo', sql.NVarChar, Titulo)
-                .input('Mensaje', sql.NVarChar, Mensaje)
-                .input('FechaApertura', sql.DateTime, new Date(FechaApertura))
-                .input('IdPlantilla', sql.Int, IdPlantilla)
-                .input('Estado', sql.NVarChar, 'Pendiente')
-                .query(`
+            const tipoPlantillaVal = TipoPlantilla != null ? String(TipoPlantilla).substring(0, 50) : null;
+            const variantePlantillaVal = VariantePlantilla != null ? String(VariantePlantilla).substring(0, 50) : null;
+            
+            // Log para debug
+            console.log('Checkout - Guardando plantilla:', {
+                TipoPlantilla: tipoPlantillaVal,
+                VariantePlantilla: variantePlantillaVal,
+                IdPlantilla
+            });
+
+            let tarjetaResult;
+            try {
+                tarjetaResult = await transaction.request()
+                    .input('NombreRemitente', sql.NVarChar, remitente)
+                    .input('NombreDestinatario', sql.NVarChar, destinatario)
+                    .input('Titulo', sql.NVarChar, Titulo)
+                    .input('Mensaje', sql.NVarChar, contenidoCarta)
+                    .input('FechaApertura', sql.DateTime, fechaApertura)
+                    .input('IdPlantilla', sql.Int, IdPlantilla)
+                    .input('Estado', sql.NVarChar, 'Pendiente')
+                    .input('TipoPlantilla', sql.NVarChar, tipoPlantillaVal)
+                    .input('VariantePlantilla', sql.NVarChar, variantePlantillaVal)
+                    .query(`
+          INSERT INTO Tarjetas (NombreRemitente, NombreDestinatario, Titulo, Mensaje, FechaApertura, IdPlantilla, Estado, TipoPlantilla, VariantePlantilla)
+          OUTPUT INSERTED.IdTarjeta
+          VALUES (@NombreRemitente, @NombreDestinatario, @Titulo, @Mensaje, @FechaApertura, @IdPlantilla, @Estado, @TipoPlantilla, @VariantePlantilla)
+        `);
+            } catch (insertErr) {
+                const msg = insertErr.message || '';
+                if (msg.includes('TipoPlantilla') || msg.includes('VariantePlantilla') || msg.includes('Invalid column')) {
+                    tarjetaResult = await transaction.request()
+                        .input('NombreRemitente', sql.NVarChar, remitente)
+                        .input('NombreDestinatario', sql.NVarChar, destinatario)
+                        .input('Titulo', sql.NVarChar, Titulo)
+                        .input('Mensaje', sql.NVarChar, contenidoCarta)
+                        .input('FechaApertura', sql.DateTime, fechaApertura)
+                        .input('IdPlantilla', sql.Int, IdPlantilla)
+                        .input('Estado', sql.NVarChar, 'Pendiente')
+                        .query(`
           INSERT INTO Tarjetas (NombreRemitente, NombreDestinatario, Titulo, Mensaje, FechaApertura, IdPlantilla, Estado)
           OUTPUT INSERTED.IdTarjeta
           VALUES (@NombreRemitente, @NombreDestinatario, @Titulo, @Mensaje, @FechaApertura, @IdPlantilla, @Estado)
         `);
+                } else {
+                    throw insertErr;
+                }
+            }
 
             const tarjetaId = tarjetaResult.recordset[0].IdTarjeta;
+
+            // Generar código único para QR e insertar en CodigosQR
+            const codigoUnico = uuidv4();
+            await transaction.request()
+                .input('IdTarjeta', sql.Int, tarjetaId)
+                .input('CodigoUnico', sql.NVarChar, codigoUnico)
+                .input('Activo', sql.Bit, 1)
+                .input('FechaGeneracion', sql.DateTime, new Date())
+                .query('INSERT INTO CodigosQR (IdTarjeta, CodigoUnico, Activo, FechaGeneracion) VALUES (@IdTarjeta, @CodigoUnico, @Activo, @FechaGeneracion)');
 
             // Crear Pago con Confirmado = 1
             await transaction.request()
@@ -58,17 +122,10 @@ const checkout = async (req, res) => {
                 .input('Estado', sql.NVarChar, 'Disponible')
                 .query('UPDATE Tarjetas SET Estado = @Estado WHERE IdTarjeta = @IdTarjeta');
 
-            // Generar UUID y insertar en CodigosQR
-            const codigoQR = uuidv4();
-            await transaction.request()
-                .input('CodigoQR', sql.NVarChar, codigoQR)
-                .input('IdTarjeta', sql.Int, tarjetaId)
-                .input('Activo', sql.Bit, 1)
-                .query('INSERT INTO CodigosQR (CodigoQR, IdTarjeta, Activo) VALUES (@CodigoQR, @IdTarjeta, @Activo)');
-
             await transaction.commit();
 
-            res.status(201).json({ tarjetaId, codigoQR, precio });
+            // Devolver el código único generado para que el frontend lo use en el QR
+            res.status(201).json({ tarjetaId, codigoUnico, codigoQR: codigoUnico, precio });
         } catch (error) {
             await transaction.rollback();
             throw error;
