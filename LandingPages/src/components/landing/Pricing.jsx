@@ -13,13 +13,13 @@ export default function Pricing() {
       try {
         setLoading(true)
         setError(null)
-        
+
         console.log('Fetching plantillas from:', API_URL)
-        
+
         // Crear un AbortController para timeout
         const controller = new AbortController()
         timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos timeout
-        
+
         const response = await fetch(API_URL, {
           method: 'GET',
           headers: {
@@ -44,11 +44,11 @@ export default function Pricing() {
         const data = await response.json()
         console.log('Data received:', data)
         console.log('Number of plantillas:', data?.length)
-        
+
         if (!Array.isArray(data)) {
           throw new Error('La respuesta no es un array válido')
         }
-        
+
         if (data.length === 0) {
           console.warn('Array vacío recibido')
         }
@@ -58,7 +58,7 @@ export default function Pricing() {
       } catch (err) {
         if (timeoutId) clearTimeout(timeoutId)
         console.error('Error fetching plantillas:', err)
-        
+
         if (err.name === 'AbortError') {
           setError('La petición tardó demasiado. Por favor, intenta de nuevo.')
         } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
@@ -66,7 +66,7 @@ export default function Pricing() {
         } else {
           setError(err.message || 'Error desconocido al cargar las plantillas')
         }
-        
+
         // En caso de error, mostrar datos de ejemplo para desarrollo
         if (import.meta.env.DEV) {
           console.warn('Modo desarrollo: Usando datos de ejemplo debido al error')
@@ -207,7 +207,7 @@ export default function Pricing() {
                 console.warn('Plan inválido:', plan)
                 return null
               }
-              
+
               const styles = getPlanStyles(plan.Nombre)
               const features = getPlanFeatures(plan.Nombre)
               const isPremium = plan.Nombre.toLowerCase().includes('premium')
@@ -217,53 +217,53 @@ export default function Pricing() {
                   key={plan.IdPlantilla}
                   className={`rounded-2xl p-8 ${styles.container} transition-all duration-300 hover:shadow-xl relative`}
                 >
-                {isPremium && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className={`${styles.badge} px-4 py-1 rounded-full text-sm font-bold shadow-lg`}>
-                      ⭐ MÁS POPULAR
-                    </span>
-                  </div>
-                )}
+                  {isPremium && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <span className={`${styles.badge} px-4 py-1 rounded-full text-sm font-bold shadow-lg`}>
+                        ⭐ MÁS POPULAR
+                      </span>
+                    </div>
+                  )}
 
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-display font-bold mb-2">
-                    {plan.Nombre}
-                  </h3>
-                  <div className={`text-5xl font-bold mb-2 ${styles.price}`}>
-                    ${plan.Precio}
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-display font-bold mb-2">
+                      {plan.Nombre}
+                    </h3>
+                    <div className={`text-5xl font-bold mb-2 ${styles.price}`}>
+                      ${plan.Precio}
+                    </div>
+                    <p className="text-sm opacity-80 mt-2">
+                      {plan.Descripcion || 'Plan completo para tu carta especial'}
+                    </p>
                   </div>
-                  <p className="text-sm opacity-80 mt-2">
-                    {plan.Descripcion || 'Plan completo para tu carta especial'}
-                  </p>
+
+                  <ul className="space-y-3 mb-8">
+                    {features.map((feature, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg
+                          className={`w-5 h-5 mr-2 mt-0.5 flex-shrink-0 ${isPremium ? 'text-yellow-300' : 'text-purple-600'
+                            }`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href="https://tarjetafelicitaciones-2.onrender.com/"
+                    className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all duration-300 ${styles.button}`}
+                  >
+                    Seleccionar
+                  </a>
                 </div>
-
-                <ul className="space-y-3 mb-8">
-                  {features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <svg
-                        className={`w-5 h-5 mr-2 mt-0.5 flex-shrink-0 ${isPremium ? 'text-yellow-300' : 'text-purple-600'
-                          }`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href="https://tarjetafelicitaciones.onrender.com/enviar-carta"
-                  className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-all duration-300 ${styles.button}`}
-                >
-                  Seleccionar
-                </a>
-              </div>
               )
             })}
           </div>
