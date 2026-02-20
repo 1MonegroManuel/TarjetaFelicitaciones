@@ -17,14 +17,14 @@ export default function Hero() {
             abrirse en el momento perfecto
           </span>
         </h1>
-        
+
         <p className="text-xl md:text-2xl text-gray-700 mb-10 max-w-3xl mx-auto leading-relaxed">
           Crea una experiencia única para esa persona especial. Programa la sorpresa y deja que la emoción haga el resto.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <a
-            href="https://tarjetafelicitaciones.onrender.com/enviar-carta"
+            href="https://tarjetafelicitaciones-2.onrender.com/"
             className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg"
           >
             Crear mi carta
