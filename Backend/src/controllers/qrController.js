@@ -68,7 +68,7 @@ const getTarjetaByQR = async (req, res) => {
       return res.status(403).json({ error: 'La tarjeta no está disponible' });
     }
 
-    const now = new Date();
+    const now = new Date(new Date().toISOString());
     const fechaApertura = new Date(tarjeta.FechaApertura);
 
     // Aún no es la fecha de apertura → 403 con FechaApertura para countdown
@@ -96,7 +96,7 @@ const getTarjetaByQR = async (req, res) => {
 
     // Devolver datos de la tarjeta (excluir IdQR interno pero mantener CodigoUnico)
     const { IdQR, ...tarjetaData } = tarjeta;
-    
+
     // Log para debug (puedes comentarlo después)
     console.log('Tarjeta devuelta:', {
       TipoPlantilla: tarjetaData.TipoPlantilla,
@@ -105,7 +105,7 @@ const getTarjetaByQR = async (req, res) => {
       IdTarjeta: tarjetaData.IdTarjeta,
       TodosLosCampos: Object.keys(tarjetaData)
     });
-    
+
     res.status(200).json(tarjetaData);
 
   } catch (error) {

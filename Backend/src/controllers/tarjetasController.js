@@ -18,7 +18,7 @@ const createTarjeta = async (req, res) => {
         message: "Faltan campos obligatorios"
       });
     }
-
+    const fechaUTC = new Date(FechaApertura + "T00:00:00Z");
     const pool = await poolPromise;
 
     const result = await pool.request()
@@ -27,7 +27,7 @@ const createTarjeta = async (req, res) => {
       .input("Titulo", sql.NVarChar, Titulo)
       .input("Mensaje", sql.NVarChar, Mensaje)
       .input("UrlImagen", sql.NVarChar, UrlImagen)
-      .input("FechaApertura", sql.DateTime, FechaApertura)
+      .input("FechaApertura", sql.DateTime, fechaUTC)
       .input("IdPlantilla", sql.Int, IdPlantilla)
       .query(`
         INSERT INTO Tarjetas 
@@ -106,7 +106,7 @@ const updateTarjeta = async (req, res) => {
       UrlImagen,
       FechaApertura
     } = req.body;
-
+    const fechaUTC = new Date(FechaApertura + "T00:00:00Z");
     const pool = await poolPromise;
 
     //Verificar que exista
@@ -128,7 +128,7 @@ const updateTarjeta = async (req, res) => {
       .input("Titulo", sql.NVarChar, Titulo)
       .input("Mensaje", sql.NVarChar, Mensaje)
       .input("UrlImagen", sql.NVarChar, UrlImagen)
-      .input("FechaApertura", sql.DateTime, FechaApertura)
+      .input("FechaApertura", sql.DateTime, fechaUTC)
       .query(`
         UPDATE Tarjetas
         SET 
