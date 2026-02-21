@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7'];
+const colors = ['#3b82f6', '#f9ffa4', '#86efac', '#a855f7'];
 
 export function BásicaPreview({ activeColor }) {
   const c = activeColor != null ? colors[activeColor] : colors[0];

@@ -166,6 +166,15 @@ export default function QRScanner() {
     setValidating(false);
   }, []);
 
+  const onScanSuccess = useCallback((decodedText) => {
+    if (!decodedText || scanningRef.current) return;
+    scanningRef.current = true;
+    setError('');
+    fetchCartaByCodigo(decodedText).finally(() => {
+      scanningRef.current = false;
+    });
+  }, [fetchCartaByCodigo]);
+
   const handleFileUpload = useCallback((event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -196,20 +205,6 @@ export default function QRScanner() {
   }, [onScanSuccess]);
 
   // Abrir por enlace (codigo en query)
-  useEffect(() => {
-    if (!codigoFromUrl) return;
-    resetState();
-    fetchCartaByCodigo(codigoFromUrl);
-  }, [codigoFromUrl, resetState, fetchCartaByCodigo]);
-
-  const onScanSuccess = useCallback((decodedText) => {
-    if (!decodedText || scanningRef.current) return;
-    scanningRef.current = true;
-    setError('');
-    fetchCartaByCodigo(decodedText).finally(() => {
-      scanningRef.current = false;
-    });
-  }, [fetchCartaByCodigo]);
 
   // Cámara: getUserMedia + <video> + loop de escaneo con jsQR
   useEffect(() => {

@@ -47,7 +47,7 @@ export default function FinalScreen() {
         title: 'Carta digital',
         text,
         url,
-      }).catch(() => {});
+      }).catch(() => { });
     } else {
       navigator.clipboard?.writeText(text).then(() => alert('Enlace copiado'));
     }
@@ -95,7 +95,7 @@ export default function FinalScreen() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        <QRCodeSVG value={codigoQR} size={200} level="M" />
+        <QRCodeSVG value={codigoQR} size={200} level="M" bgColor="white" />
       </motion.div>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">

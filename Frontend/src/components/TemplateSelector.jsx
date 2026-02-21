@@ -8,8 +8,8 @@ import {
 
 const BASIC_COLORS = [
   { id: 0, color: '#3b82f6', variante: 'azul', name: 'Azul' },
-  { id: 1, color: '#6366f1', variante: 'indigo', name: 'Índigo' },
-  { id: 2, color: '#8b5cf6', variante: 'violeta', name: 'Violeta' },
+  { id: 1, color: '#f9ffa4', variante: 'amarillo', name: 'Amarillo' },
+  { id: 2, color: '#86efac', variante: 'verde', name: 'Verde' },
   { id: 3, color: '#a855f7', variante: 'purpura', name: 'Púrpura' },
 ];
 
@@ -61,11 +61,10 @@ export default function TemplateSelector({ onNext }) {
             <motion.button
               key={id}
               type="button"
-              className={`w-10 h-10 rounded-full border-2 transition-all ${
-                tier === 'basica' && option === id
-                  ? 'border-indigo-500 scale-110'
-                  : 'border-slate-300'
-              }`}
+              className={`w-10 h-10 rounded-full border-2 transition-all ${tier === 'basica' && option === id
+                ? 'border-indigo-500 scale-110'
+                : 'border-slate-300'
+                }`}
               style={{ backgroundColor: color }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setTemplate({ tier: 'basica', option: id, idPlantilla: 1, tipoPlantilla: 'basica', variantePlantilla: variante })}
@@ -82,11 +81,10 @@ export default function TemplateSelector({ onNext }) {
             <motion.button
               key={id}
               type="button"
-              className={`w-10 h-10 rounded-full border-2 transition-all ${
-                tier === 'media' && option === id
-                  ? 'border-indigo-500 scale-110'
-                  : 'border-slate-300'
-              }`}
+              className={`w-10 h-10 rounded-full border-2 transition-all ${tier === 'media' && option === id
+                ? 'border-indigo-500 scale-110'
+                : 'border-slate-300'
+                }`}
               style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setTemplate({ tier: 'media', option: id, idPlantilla: 2, tipoPlantilla: 'media', variantePlantilla: variante })}
@@ -103,11 +101,10 @@ export default function TemplateSelector({ onNext }) {
             <motion.button
               key={opt.id}
               type="button"
-              className={`text-left py-3 px-4 rounded-xl border-2 transition-all ${
-                tier === 'premium' && option === id
-                  ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-slate-200 bg-slate-50'
-              }`}
+              className={`text-left py-3 px-4 rounded-xl border-2 transition-all ${tier === 'premium' && option === id
+                ? 'border-indigo-500 bg-indigo-50'
+                : 'border-slate-200 bg-slate-50'
+                }`}
               whileTap={{ scale: 0.99 }}
               onClick={() => setTemplate({ tier: 'premium', option: id, idPlantilla: 3, tipoPlantilla: 'premium', variantePlantilla: opt.id })}
             >

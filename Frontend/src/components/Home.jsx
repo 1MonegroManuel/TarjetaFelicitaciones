@@ -46,7 +46,7 @@ export default function Home() {
         </Link>
         <Link to="/enviar-carta">
           <motion.span
-            className="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-lg shadow-glow"
+            className="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl bg-indigo-500 text-white font-semibold text-lg shadow-glow"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
