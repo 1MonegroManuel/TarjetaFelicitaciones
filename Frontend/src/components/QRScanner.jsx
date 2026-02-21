@@ -120,6 +120,7 @@ export default function QRScanner() {
   const streamRef = useRef(null);
   const scanLoopRef = useRef(null);
   const scanningRef = useRef(false);
+  const fileInputRef = useRef(null);
 
   const resetState = useCallback(() => {
     setCarta(null);
@@ -159,11 +160,40 @@ export default function QRScanner() {
         dataCompleta: data
       });
       setCarta(data);
-      } catch (err) {
-        setError('Error de conexión. ¿Backend en marcha?');
-      }
-      setValidating(false);
-    }, []);
+    } catch (err) {
+      setError('Error de conexión. ¿Backend en marcha?');
+    }
+    setValidating(false);
+  }, []);
+
+  const handleFileUpload = useCallback((event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    setError('');
+    setValidating(true);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        const result = jsQR(imageData.data, imageData.width, imageData.height);
+        if (result && result.data) {
+          onScanSuccess(result.data);
+        } else {
+          setError('No se encontró un código QR válido en la imagen.');
+          setValidating(false);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }, [onScanSuccess]);
 
   // Abrir por enlace (codigo en query)
   useEffect(() => {
@@ -351,6 +381,24 @@ export default function QRScanner() {
             </motion.p>
           )}
         </AnimatePresence>
+
+        {!codigoFromUrl && (
+          <motion.button
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-soft hover:bg-indigo-700 transition-colors"
+            whileTap={{ scale: 0.95 }}
+          >
+            Subir imagen con QR
+          </motion.button>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
 
         <p className="mt-6 text-slate-500 text-sm text-center">Apunta la cámara al código QR de la carta</p>
       </div>
